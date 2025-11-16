@@ -1,0 +1,16 @@
+.mitra-container {
+  max-width: 600px;
+  margin: auto;
+  padding: 20px;
+  font-family: "Poppins", sans-serif;
+}
+
+.chat-area {
+  height: 420px;
+  overflow-y: auto;
+  background: #f7f7f7;
+  border-radius: 12px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+}
