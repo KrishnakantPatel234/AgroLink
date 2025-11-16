@@ -6,6 +6,7 @@ const API_URL = "http://localhost:5000/api/mitra";
 const MitraAI = () => {
   const [textInput, setTextInput] = useState("");
   const [chat, setChat] = useState([]);
+  const [messages, setMessages] = useState([]);
   const userId = "123"; // Replace with user from auth
 
   const sendText = async () => {
@@ -30,23 +31,27 @@ const MitraAI = () => {
     setTextInput("");
   };
 
-  const sendVoice = async (blob) => {
-    const formData = new FormData();
-    formData.append("audio", blob, "voice.webm");
-    formData.append("userId", userId);
-    formData.append("language", "hi");
+  const handleTranscription = async (text) => {
+    console.log("🔥 Final text from voice:", text);
 
-    const res = await fetch(`${API_URL}/voice`, {
+    // Ab text backend ko bhej do
+    const res = await fetch("http://localhost:5000/api/mitra/text", {
       method: "POST",
-      body: formData
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId: "123",
+        language: "hi",
+        message: text,
+      }),
     });
 
     const data = await res.json();
 
-    setChat((prev) => [
+    // Chatbot reply add
+    setMessages((prev) => [
       ...prev,
-      { from: "user", text: data.heardText },
-      { from: "mitra", text: data.replyText }
+      { user: "You", msg: text },
+      { user: "Mitra", msg: data.reply },
     ]);
   };
 
@@ -118,7 +123,7 @@ const MitraAI = () => {
       </div>
 
       {/* VOICE RECORDER */}
-      <VoiceRecorder onStop={sendVoice} />
+      <VoiceRecorder  onTranscription={handleTranscription} />
     </div>
   );
 };

@@ -70,7 +70,7 @@ export const voiceToTextChat = async (req, res) => {
 
     const userText =
       dgResponse.result?.channel?.alternatives?.[0]?.transcript ||
-      "Unable to recognize voice";
+      "Unable to recognize voice" || " ";
 
     // 2️⃣ Gemini reply
     let mem = await Memory.findOne({ userId });

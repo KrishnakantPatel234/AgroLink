@@ -1,64 +1,74 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect } from "react";
 
-const VoiceRecorder = ({ onStop }) => {
+const VoiceRecorder = ({ onTranscription }) => {
   const [recording, setRecording] = useState(false);
-  const mediaRecorderRef = useRef(null);
-  const chunksRef = useRef([]);
+  let recognition;
 
-  const startRecording = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  useEffect(() => {
+    // Browser speech API
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
 
-    mediaRecorderRef.current = new MediaRecorder(stream);
-    chunksRef.current = [];
+    if (!SpeechRecognition) {
+      alert("Speech Recognition not supported in this browser!");
+      return;
+    }
 
-    mediaRecorderRef.current.ondataavailable = (e) => {
-      chunksRef.current.push(e.data);
-    };
+    recognition = new SpeechRecognition();
+    recognition.lang = "hi-IN"; // You can change based on the user
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognition.continuous = false; // important = auto stop!
+  }, []);
 
-    mediaRecorderRef.current.onstop = () => {
-      const blob = new Blob(chunksRef.current, { type: "audio/webm" });
-      onStop(blob);
-    };
+  const startListening = () => {
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
 
-    mediaRecorderRef.current.start();
+    recognition = new SpeechRecognition();
+    recognition.lang = "hi-IN";
+    recognition.interimResults = false;
+    recognition.continuous = false;
+
+    recognition.start();
     setRecording(true);
-  };
+    console.log("🎤 Listening...");
 
-  const stopRecording = () => {
-    mediaRecorderRef.current.stop();
-    setRecording(false);
+    recognition.onresult = (event) => {
+      const text = event.results[0][0].transcript;
+      console.log("📝 Recognized:", text);
+      onTranscription(text); // send to chatbot
+    };
+
+    recognition.onspeechend = () => {
+      console.log("⏹ Auto stopped.");
+      recognition.stop();
+      setRecording(false);
+    };
+
+    recognition.onerror = (err) => {
+      console.error("Speech error:", err);
+      setRecording(false);
+    };
   };
 
   return (
-    <div style={{ textAlign: "center", marginTop: "1rem" }}>
+    <div style={{ textAlign: "center", marginTop: 20 }}>
       {!recording ? (
-        <button 
-          onClick={startRecording}
+        <button
+          onClick={startListening}
           style={{
-            background: "#28a745",
             padding: "12px 20px",
-            borderRadius: "10px",
-            color: "white",
-            border: "none",
-            fontSize: "16px"
+            borderRadius: 10,
+            fontSize: 18,
           }}
         >
-          🎤 Start Speaking
+          🎤 Start Talking
         </button>
       ) : (
-        <button 
-          onClick={stopRecording}
-          style={{
-            background: "red",
-            padding: "12px 20px",
-            borderRadius: "10px",
-            color: "white",
-            border: "none",
-            fontSize: "16px"
-          }}
-        >
-          ⏹ Stop
-        </button>
+        <p style={{ color: "green", fontWeight: "bold" }}>
+          Listening… (auto-stop when you stop speaking)
+        </p>
       )}
     </div>
   );
