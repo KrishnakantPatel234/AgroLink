@@ -1,24 +1,26 @@
 .bubble {
-  max-width: 80%;
-  padding: 12px;
-  margin: 10px;
-  border-radius: 12px;
-  font-size: 16px;
-  animation: fadeIn 0.3s ease;
+  max-width: 70%;
+  padding: 10px 14px;
+  margin: 6px 0;
+  border-radius: 14px;
+  font-size: 15px;
+  line-height: 1.4;
+  animation: fadeIn 0.2s ease;
 }
 
 .you {
-  background: #d1e7ff;
-  align-self: flex-end;
-  text-align: right;
+  background: #d1f1ff;
+  margin-left: auto;
+  border-bottom-right-radius: 4px;
 }
 
 .mitra {
-  background: #e1ffe1;
-  align-self: flex-start;
+  background: #e2ffd9;
+  margin-right: auto;
+  border-bottom-left-radius: 4px;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(5px); }
   to { opacity: 1; transform: translateY(0); }
 }

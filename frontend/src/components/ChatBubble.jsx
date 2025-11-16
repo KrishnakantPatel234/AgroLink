@@ -3,8 +3,10 @@ import "../styles/bubbles.css";
 
 const ChatBubble = ({ user, msg }) => {
   return (
-    <div className={user === "You" ? "bubble you" : "bubble mitra"}>
-      <strong>{user}:</strong> {msg}
+    <div className={`bubble ${user === "You" ? "you" : "mitra"}`}>
+      <div className="bubble-content">
+        {msg}
+      </div>
     </div>
   );
 };
