@@ -59,9 +59,30 @@
   100% { transform: scale(1); }
 }
 
-/* Mobile responsive */
-@media (max-width: 600px) {
-  .mitra-container {
-    height: 100vh;
-  }
+
+.icon-btn,
+.send-btn,
+.mic-btn {
+  font-size: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.send-btn {
+  background: #128c7e;
+  color: white;
+  padding: 10px;
+  border-radius: 50%;
+}
+
+.mic-btn.recording {
+  color: red;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.25); }
+  100% { transform: scale(1); }
 }

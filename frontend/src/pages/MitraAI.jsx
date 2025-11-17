@@ -54,6 +54,42 @@ const MitraChat = () => {
     ]);
   };
 
+  const startVoiceRecording = () => {
+  const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    alert("Your browser does not support voice input");
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+  recognition.lang = "hi-IN";
+  recognition.interimResults = false;
+  recognition.continuous = false;
+
+  setRecording(true);   // show mic animation
+
+  recognition.start();
+
+  recognition.onresult = (event) => {
+    const text = event.results[0][0].transcript;
+    console.log("🎙 Recognized:", text);
+    sendMessage(text);
+  };
+
+  recognition.onspeechend = () => {
+    recognition.stop();
+    setRecording(false);
+  };
+
+  recognition.onerror = () => {
+    recognition.stop();
+    setRecording(false);
+  };
+};
+
+
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -71,37 +107,48 @@ const MitraChat = () => {
       </div>
 
       <div className="chat-input-area">
-        <input
-          className="chat-input"
-          placeholder="Type your message..."
-          value={inputText}
-          onChange={(e) => setInputText(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && sendMessage(inputText)}
-        />
 
-        {/* Image Button */}
-        <button
-          className="icon-btn"
-          onClick={() => fileRef.current.click()}
-        >
-          📷
-        </button>
+  {/* TEXT INPUT */}
+  <input
+    className="chat-input"
+    placeholder="Type your message..."
+    value={inputText}
+    onChange={(e) => setInputText(e.target.value)}
+  />
 
-        <input
-          type="file"
-          ref={fileRef}
-          onChange={(e) => handleImage(e.target.files[0])}
-          style={{ display: "none" }}
-        />
+  {/* IMAGE UPLOAD BUTTON */}
+  <button
+    className="icon-btn"
+    onClick={() => fileRef.current.click()}
+  >
+    📷
+  </button>
 
-        {/* Mic Button */}
-        <button
-          className={`mic-btn ${recording ? "recording" : ""}`}
-          onClick={() => setRecording(true)}
-        >
-          🎤
-        </button>
-      </div>
+  <input
+    type="file"
+    ref={fileRef}
+    onChange={(e) => handleImage(e.target.files[0])}
+    style={{ display: "none" }}
+  />
+
+  {/* SEND BUTTON */}
+  <button
+    className="send-btn"
+    onClick={() => sendMessage(inputText)}
+  >
+    ➤
+  </button>
+
+  {/* MIC BUTTON */}
+  <button
+    className={`mic-btn ${recording ? "recording" : ""}`}
+    onClick={startVoiceRecording}
+  >
+    🎤
+  </button>
+
+</div>
+
 
       {recording && (
         <VoiceRecorder onTranscription={handleVoice} />

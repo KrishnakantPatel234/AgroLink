@@ -1,15 +1,97 @@
-import FarmerPost from "../models/FarmerPost.js";
+import Post from "../models/Post.js";
+import User from "../models/User.js";
+
 
 export const createPost = async (req, res) => {
   try {
-    const post = new FarmerPost({
-      ...req.body,
-      image: req.file?.path
-    });
-    await post.save();
+    const farmerId = req.body.farmerId; // you will use JWT later
+    const user = await User.findById(farmerId);
 
-    res.json({ message: "Post Created", post });
+    if (!user || user.role !== "farmer") {
+      return res.status(400).json({ error: "Invalid farmer" });
+    }
+
+    const {
+      title,
+      cropName,
+      quantity,
+      unit,
+      price,
+      location,
+      description
+    } = req.body;
+
+    const cropImage = req.file ? req.file.path : null;
+
+    const post = await FarmerPost.create({
+      farmerId,
+      title,
+      cropName,
+      quantity,
+      unit,
+      price,
+      location,
+      description,
+      cropImage,
+      organic: user.isOrganic
+    });
+
+    res.json({ success: true, post });
+
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+};
+
+export const getAllPosts = async (req, res) => {
+  try {
+    const { crop, location, organic, search } = req.query;
+
+    let query = {};
+
+    if (crop) query.cropName = new RegExp(crop, "i");
+    if (location) query.location = new RegExp(location, "i");
+    if (organic === "true") query.organic = true;
+
+    if (search) {
+      query.$or = [
+        { cropName: new RegExp(search, "i") },
+        { location: new RegExp(search, "i") },
+        { title: new RegExp(search, "i") }
+      ];
+    }
+
+    const posts = await FarmerPost.find(query)
+      .populate("farmerId", "name profileImage isOrganic");
+
+    res.json(posts);
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const getPostById = async (req, res) => {
+  try {
+    const post = await FarmerPost.findById(req.params.id)
+      .populate("farmerId", "name profileImage isOrganic landSize");
+
+    res.json(post);
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const getFarmerData = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const farmer = await User.findById(userId);
+    const posts = await Post.find({ farmerId: userId }).sort({ createdAt: -1 });
+
+    res.json({ farmer, posts });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to load farmer data" });
   }
 };

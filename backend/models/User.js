@@ -1,26 +1,28 @@
 import mongoose from "mongoose";
 
-const userSchema = new mongoose.Schema({
-  role: { type: String, required: true }, // farmer or buyer
-  phone: { type: String, required: true },
-  email: String,
-  name: { type: String, required: true },
-  profilePic: String,
-  location: String,
+const UserSchema = new mongoose.Schema({
+  phone: { type: String, required: true, unique: true },
 
-  // Farmer fields
-  landSize: { type: String, required: true },
-  organicCertified: Boolean,
+  role: { 
+    type: String, 
+    enum: ["farmer", "buyer"],
+    default : null
+    // required: true 
+  },
 
-  // Buyer fields
-  businessType: { type: String, required: true },
-  needs: String,
-  bulkBuyer: Boolean,
+  name: String,
+  profileImage: String,
 
-  rating: { type: Number, default: 0 },
-  verified: { type: Boolean, default: false },
+  // Farmer-specific
+  landSize: String,
+  isOrganic: { type: Boolean, default: false },
 
-  languagesPreferred: [String],
+  // Buyer-specific
+  businessType: String,
+  isBulkBuyer: { type: Boolean, default: false },
+  otp: { type: String, default: null },
+
+
 }, { timestamps: true });
 
-export default mongoose.model("User", userSchema);
+export default mongoose.model("User", UserSchema);
