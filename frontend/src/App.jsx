@@ -59,7 +59,7 @@ function App() {
       )}
 
       {step === "dashboard" && role === "farmer" && (
-        <FarmerDashboard userId={userId} />
+        <FarmerDashboard userId={userId} setStep={setStep} />
       )}
 
 

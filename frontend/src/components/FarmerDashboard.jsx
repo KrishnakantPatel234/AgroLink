@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-const FarmerDashboard = ({ userId }) => {
+const FarmerDashboard = ({ userId, setStep }) => {
   const [farmer, setFarmer] = useState(null);
   const [posts, setPosts] = useState([]);
 
@@ -24,10 +24,9 @@ const FarmerDashboard = ({ userId }) => {
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold text-green-700">👨‍🌾 Farmer Dashboard</h1>
 
-        <img
-          src={`http://localhost:5000/${farmer.profileImage}`}
-          alt="profile"
-          className="w-12 h-12 rounded-full object-cover border-2 border-green-600"
+        <img 
+        src={`http://localhost:5000/${farmer.profileImage}`} 
+        className="w-16 h-16 rounded-full object-cover"
         />
       </div>
 
@@ -47,7 +46,7 @@ const FarmerDashboard = ({ userId }) => {
 
       {/* Create Post Button */}
       <button
-        onClick={() => window.location.href = "/create-post"}
+        onClick={() => setStep("create-post")}
         className="w-full bg-green-600 text-white py-3 rounded-xl shadow-md text-lg font-semibold hover:bg-green-700 transition mb-4"
       >
         ➕ Create New Post

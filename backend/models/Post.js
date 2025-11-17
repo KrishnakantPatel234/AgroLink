@@ -7,19 +7,35 @@ const PostSchema = new mongoose.Schema({
     required: true
   },
 
-  title: { type: String, required: true },
-  cropName: { type: String, required: true },
-  quantity: { type: Number, required: true },
-  unit: { type: String, default: "KG" },
+  cropName: {
+    type: String,
+    required: true,
+  },
 
-  price:  { type: Number, required: true },
-  location: { type: String, required: true },
-  description: { type: String, required: true , minlength : 20},
+  quantity: {
+    type: String,
+    required: true,
+  },
 
-  cropImage: { type: String, required: true },
+  price: {
+    type: Number,
+    required: true,
+  },
 
-  organic: Boolean,
+  location: {
+    type: String,
+    required: true,
+  },
 
-}, { timestamps: true });
+  image: {
+    type: String,
+    required: true, // multer path
+  },
+
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+});
 
 export default mongoose.model("Post", PostSchema);

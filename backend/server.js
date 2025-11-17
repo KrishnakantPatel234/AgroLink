@@ -15,38 +15,29 @@ import otpRoutes from "./routes/otpRoutes.js";
 import mitraRoutes from "./routes/mitraRoutes.js";
 import postRoutes from "./routes/postRoutes.js";
 
+// 1️⃣ CONNECT DB ONCE
 connectDB();
 
 const app = express();
 
-/******************************
- * 1) Middlewares FIRST
- ******************************/
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use("/uploads", express.static("uploads"));
 
-/******************************
- * 2) Routes (multer included)
- ******************************/
+// 2️⃣ ROUTES LOADED IN ORDER
 app.use("/api/auth", authRoutes);
-app.use("/api/post", postRoutes);
+app.use("/api/otp", otpRoutes);
 app.use("/api/farmer", farmerRoutes);
 app.use("/api/buyers", buyerRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/mandi", mandiRoutes);
-app.use("/api/otp", otpRoutes);
 app.use("/api/mitra", mitraRoutes);
-// You already had duplicate route "/api/farmers", removing extra one
-// app.use("/api/farmers", farmerRoutes);
+app.use("/api/post", postRoutes);
 
-/******************************
- * 3) Socket Server
- ******************************/
+// 3️⃣ SOCKET SERVER
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 
-// Track online users
 let onlineUsers = {};
 
 io.on("connection", (socket) => {
@@ -58,6 +49,7 @@ io.on("connection", (socket) => {
 
   socket.on("sendVoiceMessage", (data) => {
     const receiverSocket = onlineUsers[data.receiverId];
+
     if (receiverSocket) {
       io.to(receiverSocket).emit("receiveVoiceMessage", data);
     }
@@ -69,5 +61,5 @@ io.on("connection", (socket) => {
 });
 
 server.listen(5000, () => {
-  console.log("🚀 Server running on port 5000");
+  console.log("🚀 Backend running on port 5000");
 });
