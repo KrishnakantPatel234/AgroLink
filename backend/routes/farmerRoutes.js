@@ -4,21 +4,20 @@ import {
   createPost,
   getAllPosts,
   getPostById,
-  getFarmerData
+  getFarmerData,
+  getTopFarmers
 } from "../controllers/farmerController.js";
 
 const router = express.Router();
 
-/********* POST ROUTES *********/
-router.post("/post", upload.single("cropImage"), createPost);
-
-/********* GET ALL POSTS *********/
 router.get("/all", getAllPosts);
+router.get("/top", getTopFarmers);
 
-/********* GET SPECIFIC POST *********/
+router.post("/post", upload.single("cropImage"), createPost);
 router.get("/post/:id", getPostById);
 
-/********* GET FARMER DASHBOARD DATA *********/
 router.get("/profile/:userId", getFarmerData);
+
+
 
 export default router;

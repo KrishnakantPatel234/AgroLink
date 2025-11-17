@@ -1,8 +1,8 @@
 import express from "express";
-import { matchBuyers } from "../controllers/buyerController.js";
+import { getTopBuyers } from "../controllers/buyerController.js";
 
 const router = express.Router();
 
-router.get("/matching", matchBuyers);
+router.get("/top", getTopBuyers);
 
 export default router;

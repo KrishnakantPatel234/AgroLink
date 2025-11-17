@@ -1,71 +1,42 @@
-import React, { useState } from "react";
-import PhoneLogin from "./components/PhoneLogin";
-import OTPVerify from "./components/OTPVerify";
-import RoleSelect from "./components/RoleSelect";
-import ProfileSetup from "./components/ProfileSetup";
-import CreatePost from "./components/CreatePost";
-import FarmerDashboard from "./components/FarmerDashboard";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
+
+import Home from "./pages/Home";
+// import FarmersPage from "./pages/FarmersPage";
+// import BuyersPage from "./pages/BuyersPage";
+import MitraAI from "./pages/MitraAI";
+// import MandiPage from "./pages/MandiPage";
+// import Dashboard from "./pages/Dashboard";
+import CreatePost from "./pages/CreatePost";
+import Login from "./pages/Login";
+import Register from "./components/auth/PhoneLogin";
+import OTPVerify from "./components/auth/OTPVerify";
+import ProfileSetup from "./components/auth/ProfileSetup";
 
 function App() {
-  const [step, setStep] = useState("phone");
-  const [phone, setPhone] = useState("");
-  const [userId, setUserId] = useState("");
-  const [role, setRole] = useState("");
-
   return (
-    <>
-      {step === "phone" && (
-        <PhoneLogin
-          onOTPSent={(num) => {
-            setPhone(num);
-            setStep("otp");
-          }}
-        />
-      )}
+    <BrowserRouter>
+      <Navbar />
 
-      {step === "otp" && (
-        <OTPVerify
-          phone={phone}
-          onVerified={(id) => {
-            setUserId(id);
-            setStep("role");
-          }}
-        />
-      )}
+      <Routes>
+        <Route path="/" element={<Home />} />
+        {/* <Route path="/farmers" element={<FarmersPage />} /> */}
+        {/* <Route path="/buyers" element={<BuyersPage />} /> */}
+        <Route path="/mitra" element={<MitraAI />} />
+        {/* <Route path="/mandi" element={<MandiPage />} /> */}
+        {/* <Route path="/dashboard" element={<Dashboard />} /> */}
+        <Route path="/create-post" element={<CreatePost />} />
 
-      {step === "role" && (
-        <RoleSelect
-          userId={userId}
-          onRoleSelected={(role) => {
-            setRole(role);
-            setStep("profile");
-          }}
-        />
-      )}
+        {/* Auth pages */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/otp" element={<OTPVerify />} />
+        <Route path="/profile-setup" element={<ProfileSetup />} />
+      </Routes>
 
-      {step === "profile" && (
-        <ProfileSetup
-          userId={userId}
-          role={role}
-          onProfileDone={() => setStep("dashboard")}
-        />
-      )}
-
-      {step === "create-post" && (
-        <CreatePost
-          userId={userId}
-          onPostCreated={() => setStep("dashboard")}
-        />
-      )}
-
-      {step === "dashboard" && role === "farmer" && (
-        <FarmerDashboard userId={userId} setStep={setStep} />
-      )}
-
-
-
-      {step === "role" && <RoleSelect userId={userId} />}
-    </>
+      <Footer />
+    </BrowserRouter>
   );
 }
 

@@ -1,5 +1,6 @@
 import axios from "axios";
 import User from "../models/User.js";
+import bcrypt from "bcryptjs";
 
 export const sendOTP = async (req, res) => {
   try {
@@ -80,6 +81,10 @@ export const updateUserProfile = async (req, res) => {
     user.name = name || user.name;
     user.role = role || user.role;
 
+    if (req.body.password) {
+      user.password = await bcrypt.hash(req.body.password, 10);
+    }
+
     // Handle profile image
     if (req.file) {
       user.profileImage = req.file.path;
@@ -109,5 +114,39 @@ export const updateUserProfile = async (req, res) => {
   } catch (err) {
     console.log("🔥 PROFILE UPDATE ERROR:", err);
     res.status(500).json({ error: "Profile update failed" });
+  }
+};
+
+export const login = async (req, res) => {
+  try {
+    const { phone, password } = req.body;
+
+    if (!phone || !password) {
+      return res.status(400).json({ error: "Phone and password required" });
+    }
+
+    const user = await User.findOne({ phone });
+
+    if (!user) {
+      return res.status(404).json({
+        error: "User not found. Please register first."
+      });
+    }
+
+    const match = await bcrypt.compare(password, user.password);
+
+    if (!match) {
+      return res.status(401).json({ error: "Incorrect password" });
+    }
+
+    return res.json({
+      success: true,
+      message: "Login successful",
+      userId: user._id,
+      role: user.role
+    });
+
+  } catch (err) {
+    res.status(500).json({ error: "Login failed" });
   }
 };

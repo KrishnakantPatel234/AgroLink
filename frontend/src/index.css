@@ -1,1 +1,5 @@
 @import "tailwindcss";
+
+body {
+  padding-top: 70px; /* so navbar doesn't overlap */
+}

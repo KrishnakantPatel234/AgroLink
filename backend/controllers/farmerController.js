@@ -95,3 +95,16 @@ export const getFarmerData = async (req, res) => {
     res.status(500).json({ error: "Failed to load farmer data" });
   }
 };
+
+export const getTopFarmers = async (req, res) => {
+  try {
+    const topFarmers = await User.find({ role: "farmer" })
+      .sort({ ratings: -1 })
+      .limit(5);
+
+    res.json(topFarmers);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
