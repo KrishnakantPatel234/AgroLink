@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const Navbar = () => {
@@ -7,12 +7,33 @@ const Navbar = () => {
 
   const location = useLocation();
   const navigate = useNavigate();
+  const dropdownRef = useRef(null);
 
-  const userId = localStorage.getItem("userId");
-  const userName = localStorage.getItem("userName");
-  const userImage = localStorage.getItem("userImage");
 
-  // Links for everyone
+
+  const [user, setUser] = useState(() => ({
+    id: localStorage.getItem("userId"),
+    name: localStorage.getItem("userName"),
+    image: localStorage.getItem("userImage"),
+  }));
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setProfileMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.clear();
+    setUser({ id: null, name: "", image: "" });
+    navigate("/login");
+  };
+
   const commonLinks = [
     { name: "Home", to: "/" },
     { name: "Farmers", to: "/farmers" },
@@ -20,11 +41,6 @@ const Navbar = () => {
     { name: "Mitra AI", to: "/mitra" },
     { name: "Mandi Rates", to: "/mandi" },
   ];
-
-  const handleLogout = () => {
-    localStorage.clear();
-    navigate("/login");
-  };
 
   return (
     <nav className="fixed top-0 left-0 w-full z-50 bg-white/20 backdrop-blur-lg border-b border-green-200 shadow-sm">
@@ -48,7 +64,6 @@ const Navbar = () => {
 
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center gap-8 text-lg font-medium">
-
           {commonLinks.map((lnk) => (
             <Link
               key={lnk.to}
@@ -63,8 +78,8 @@ const Navbar = () => {
             </Link>
           ))}
 
-          {/* IF NOT LOGGED IN → Show Login + Signup */}
-          {!userId && (
+          {/* NOT LOGGED IN */}
+          {!user.id && (
             <>
               <Link
                 to="/login"
@@ -82,31 +97,42 @@ const Navbar = () => {
             </>
           )}
 
-          {/* IF LOGGED IN → Show Profile Bubble */}
-          {userId && (
-            <div
-              className="relative"
-              onMouseLeave={() => setProfileMenu(false)}
-            >
+          {/* LOGGED IN */}
+          {user.id && (
+            <div className="relative" ref={dropdownRef}>
               <div
                 onClick={() => setProfileMenu(!profileMenu)}
-                className="flex items-center gap-2 cursor-pointer"
+                className="flex items-center gap-2 cursor-pointer select-none"
               >
                 <img
-                  src={userImage || "https://via.placeholder.com/40"}
+                  src={
+                    user.image ||
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      user.name || "User"
+                    )}&background=16a34a&color=fff&bold=true`
+                  }
+                  onError={(e) =>
+                    (e.target.src =
+                      `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                        user.name || "User"
+                      )}&background=16a34a&color=fff`)
+                  }
                   alt="profile"
-                  className="w-10 h-10 rounded-full border-2 border-green-500"
+                  className="w-10 h-10 rounded-full border-2 border-green-500 object-cover"
                 />
+
                 <span className="font-semibold text-gray-800">
-                  {userName || "Profile"}
+                  {user.name || "Profile"}
                 </span>
               </div>
 
-              {/* Dropdown */}
               {profileMenu && (
-                <div className="absolute right-0 mt-3 bg-white w-40 shadow-xl border rounded-xl py-2">
+                <div className="absolute right-0 mt-3 bg-white w-44 shadow-xl border rounded-xl py-2 z-50">
                   <button
-                    onClick={() => navigate("/dashboard")}
+                    onClick={() => {
+                      setProfileMenu(false);
+                      navigate("/dashboard");
+                    }}
                     className="block w-full text-left px-4 py-2 hover:bg-gray-100"
                   >
                     My Profile
@@ -127,7 +153,6 @@ const Navbar = () => {
       {/* MOBILE MENU */}
       {open && (
         <ul className="md:hidden bg-white/90 backdrop-blur-xl border-t border-green-200 shadow-xl flex flex-col p-4 space-y-4 text-lg font-medium">
-
           {commonLinks.map((lnk) => (
             <Link
               key={lnk.to}
@@ -143,8 +168,7 @@ const Navbar = () => {
             </Link>
           ))}
 
-          {/* NOT LOGGED IN */}
-          {!userId && (
+          {!user.id && (
             <>
               <Link
                 to="/login"
@@ -164,8 +188,7 @@ const Navbar = () => {
             </>
           )}
 
-          {/* LOGGED IN */}
-          {userId && (
+          {user.id && (
             <>
               <button
                 onClick={() => {

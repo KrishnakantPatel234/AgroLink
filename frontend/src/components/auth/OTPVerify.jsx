@@ -1,4 +1,7 @@
 import React, { useState, useRef } from "react";
+import { postRequest } from "../../api";  // import sahi path se
+
+
 
 const OTPVerify = ({ phone, onVerified }) => {
   const [otp, setOtp] = useState(["", "", "", ""]);
@@ -10,7 +13,7 @@ const OTPVerify = ({ phone, onVerified }) => {
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
-
+    
     if (value && index < 3) {
       inputRefs[index + 1].current.focus();
     }
@@ -24,13 +27,7 @@ const OTPVerify = ({ phone, onVerified }) => {
       return;
     }
 
-    const res = await fetch("http://localhost:5000/api/auth/verify-otp", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phone, otp: finalOTP })
-    });
-
-    const data = await res.json();
+    const data = await postRequest("/auth/verify-otp", { phone , otp : finalOTP });
 
     if (data.success) {
       onVerified(data.userId);
