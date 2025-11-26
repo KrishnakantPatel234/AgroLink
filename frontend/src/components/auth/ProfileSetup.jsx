@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+import { postFormData } from "../../api";
+
+const token = localStorage.getItem("token");
 
 const ProfileSetup = ({ userId, role, onProfileDone }) => {
   const [name, setName] = useState("");
@@ -50,12 +53,7 @@ const ProfileSetup = ({ userId, role, onProfileDone }) => {
       formData.append("isBulkBuyer", isBulkBuyer);
     }
 
-    const res = await fetch("http://localhost:5000/api/auth/update-profile", {
-      method: "POST",
-      body: formData,
-    });
-
-    const data = await res.json();
+    const data = await postFormData("/auth/update-profile", formData, token);
 
     if (data.success) {
       onProfileDone();
