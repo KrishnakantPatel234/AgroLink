@@ -9,6 +9,60 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const reviewsData = [
+    {
+      name: "Ramesh Yadav",
+      tag: "Tomato Farmer, UP",
+      review: "BharatKrishi se mandi tak jaane ki tension kam ho gayi. Phone pe hi buyers mil jaate hain.",
+    },
+    {
+      name: "Suresh Traders",
+      tag: "Grain Buyer, Indore",
+      review: "Organic farmers dhundhna pehle mushkil tha. Ab direct unke listings dekh leta hoon.",
+    },
+    {
+      name: "Neha Farms",
+      tag: "Vegetable Grower, MP",
+      review: "Mitra AI se fasal ki dikkat samajhna easy ho gaya. Language simple hai, samajh aa jaata hai.",
+    },
+    {
+      name: "Kavita Devi",
+      tag: "Small Farmer, Bihar",
+      review: "Pehli baar online becha, phir bhi process simple laga. Bacchon ne help kari, par app bhi easy hai.",
+    },
+    {
+      name: "Ajay Traders",
+      tag: "Wholesale Buyer, Pune",
+      review: "Bulk order ke liye ek hi jagah itne saare farmers mil gaye. Time aur paisa dono bacha.",
+    },
+    {
+      name: "Mohit Singh",
+      tag: "Wheat Farmer, Rajasthan",
+      review: "Mandi rate aur buyer ka rate compare karke better deal mil gayi. Pehle andaza se bechta tha.",
+    },
+    {
+      name: "Radha Agro",
+      tag: "Fruit Supplier, Nashik",
+      review: "Photo ke saath listing karne se buyers ko quality dikh jaati hai. Calls bhi badh gaye.",
+    },
+    {
+      name: "Iqbal Khan",
+      tag: "Onion Farmer, Maharashtra",
+      review: "Internate slow hone par bhi basic cheezein chal jaati hain. Ye sabse bada plus point hai.",
+    },
+    {
+      name: "Sharma & Sons",
+      tag: "Retail Store, Delhi",
+      review: "Direct farmers se baat karke beech ka commission bach gaya. Price bhi stable rehne laga.",
+    },
+    {
+      name: "Sunita Verma",
+      tag: "Dairy & Fodder, Haryana",
+      review: "App Hindi mein samajh aa jaata hai, isliye main bhi bina tension use kar leti hoon.",
+    },
+  ];
+
+
   useEffect(() => {
     const fetchTopData = async () => {
       try {
@@ -215,36 +269,81 @@ const Home = () => {
       </section>
 
       {/* REVIEWS */}
-      <section className="py-16 px-6 bg-green-100">
-        <h2 className="text-3xl font-bold text-green-700 text-center mb-8">
+      <section className="py-16 px-4 md:px-6 bg-green-100">
+        <h2 className="text-3xl md:text-4xl font-bold text-green-800 text-center mb-4">
           What Users Say
         </h2>
+        <p className="text-sm text-center text-gray-600 mb-8">
+          Real stories from farmers and buyers using BharatKrishi every day.
+        </p>
 
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {[
-            {
-              name: "Ramesh Yadav",
-              review: "BharatKrishi helped me sell tomatoes 3x faster!",
-            },
-            {
-              name: "Suresh Traders",
-              review: "Found great farmers with organic produce.",
-            },
-            {
-              name: "Neha Farms",
-              review: "Mitra AI is better than any crop advisor!",
-            },
-          ].map((r, i) => (
-            <div
-              key={i}
-              className="bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition"
-            >
-              <p className="text-gray-600 italic">“{r.review}”</p>
-              <p className="text-lg font-bold mt-3 text-green-700">
-                – {r.name}
-              </p>
-            </div>
-          ))}
+        {/* Inline keyframes – no external CSS file */}
+        <style>
+          {`
+            @keyframes review-marquee {
+              0% { transform: translateX(0); }
+              100% { transform: translateX(-50%); }
+            }
+          `}
+        </style>
+
+        <div className="max-w-6xl mx-auto overflow-hidden">
+          <div
+            className="flex gap-4 md:gap-6 py-2"
+            style={{
+              animation: "review-marquee 40s linear infinite",
+              width: "max-content",
+            }}
+          >
+            {[...reviewsData, ...reviewsData].map((r, i) => (
+              <div
+                key={i}
+                className="shrink-0 w-64 h-64 md:w-72 md:h-72 rounded-2xl bg-gradient-to-br from-white/90 via-white to-green-50 border border-green-100 shadow-lg flex flex-col p-4 md:p-5 hover:shadow-xl hover:-translate-y-1 transition-transform duration-200"
+              >
+                {/* Top section: avatar + name + tag + rating */}
+                <div className="flex items-center gap-3 mb-3">
+                  {/* Fake avatar */}
+                  <div className="w-12 h-12 rounded-full bg-green-200 flex items-center justify-center text-green-900 font-bold text-lg shadow-inner">
+                    {r.name.charAt(0)}
+                  </div>
+
+                  <div className="flex-1">
+                    <p className="font-semibold text-gray-900 text-sm md:text-base truncate">
+                      {r.name}
+                    </p>
+                    <p className="text-[11px] md:text-xs text-gray-500 truncate">
+                      {r.tag}
+                    </p>
+                    <div className="text-xs mt-1 text-yellow-500">
+                      {"★".repeat(r.rating)}
+                      <span className="text-gray-300">
+                        {"★".repeat(5 - r.rating)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Divider */}
+                <div className="h-px bg-gradient-to-r from-green-200 via-green-100 to-transparent mb-3" />
+
+                {/* Review text */}
+                <div className="flex-1 flex items-center">
+                  <p className="text-gray-700 text-xs md:text-sm leading-relaxed">
+                    “{r.review}”
+                  </p>
+                </div>
+
+                {/* Bottom subtle label */}
+                <div className="mt-3 flex items-center justify-between text-[11px] text-gray-400">
+                  <span>Verified BharatKrishi user</span>
+                  <span className="inline-flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-green-500" />
+                    BharatKrishi
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     </div>

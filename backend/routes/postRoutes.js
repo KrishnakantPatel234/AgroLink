@@ -1,10 +1,16 @@
 import express from "express";
-import { createPost } from "../controllers/postController.js";
-import { uploadPostImage } from "../middleware/uploadPost.js";
+import { createFarmerPost } from "../controllers/postController.js";
+import { protect } from "../middleware/authMiddleware.js";
+import { uploadPostMiddleware } from "../middleware/uploadPostMiddleware.js";
 
 const router = express.Router();
 
-// FINAL ENDPOINT → POST /api/post/create
-router.post("/create", uploadPostImage.single("image"), createPost);
+// farmer post create: voice form se aa raha hai
+router.post(
+  "/create",
+  protect,                   // token required
+  uploadPostMiddleware.single("image"),    // "image" field from FormData
+  createFarmerPost
+);
 
 export default router;

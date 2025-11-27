@@ -1,4 +1,4 @@
-import Post from "../models/Post.js";
+import Product from "../models/Product.js";
 import User from "../models/User.js";
 
 
@@ -43,33 +43,62 @@ export const createPost = async (req, res) => {
   }
 };
 
-export const getAllPosts = async (req, res) => {
+export const getFarmerProfile = async (req, res) => {
   try {
-    const { crop, location, organic, search } = req.query;
+    const { id } = req.params;
 
-    let query = {};
-
-    if (crop) query.cropName = new RegExp(crop, "i");
-    if (location) query.location = new RegExp(location, "i");
-    if (organic === "true") query.organic = true;
-
-    if (search) {
-      query.$or = [
-        { cropName: new RegExp(search, "i") },
-        { location: new RegExp(search, "i") },
-        { title: new RegExp(search, "i") }
-      ];
+    const user = await User.findById(id);
+    if (!user || user.role !== "farmer") {
+      return res
+        .status(404)
+        .json({ success: false, error: "Farmer not found" });
     }
 
-    const posts = await FarmerPost.find(query)
-      .populate("farmerId", "name profileImage isOrganic");
+    // saare products/posts jo is farmer ne banaye
+    const posts = await Product.find({ farmer: id })
+      .sort({ createdAt: -1 }) // latest on top
+      .lean();
 
-    res.json(posts);
-
+    return res.json({
+      success: true,
+      user,
+      posts,
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("🔥 getFarmerProfile error:", err);
+    return res
+      .status(500)
+      .json({ success: false, error: "Failed to load farmer profile" });
   }
 };
+
+// export const getAllPosts = async (req, res) => {
+//   try {
+//     const { crop, location, organic, search } = req.query;
+
+//     let query = {};
+
+//     if (crop) query.cropName = new RegExp(crop, "i");
+//     if (location) query.location = new RegExp(location, "i");
+//     if (organic === "true") query.organic = true;
+
+//     if (search) {
+//       query.$or = [
+//         { cropName: new RegExp(search, "i") },
+//         { location: new RegExp(search, "i") },
+//         { title: new RegExp(search, "i") }
+//       ];
+//     }
+
+//     const posts = await FarmerPost.find(query)
+//       .populate("farmerId", "name profileImage isOrganic");
+
+//     res.json(posts);
+
+//   } catch (err) {
+//     res.status(500).json({ error: err.message });
+//   }
+// };
 
 export const getPostById = async (req, res) => {
   try {
