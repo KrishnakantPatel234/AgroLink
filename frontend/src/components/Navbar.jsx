@@ -36,7 +36,7 @@ const Navbar = () => {
 
   const commonLinks = [
     { name: "Home", to: "/" },
-    { name: "Farmers", to: "/farmers" },
+    { name: "MarketPlace", to: "/marketplace" },
     { name: "Buyers", to: "/buyers" },
     { name: "Mitra AI", to: "/mitra" },
     { name: "Mandi Rates", to: "/mandi" },
@@ -128,15 +128,28 @@ const Navbar = () => {
 
               {profileMenu && (
                 <div className="absolute right-0 mt-3 bg-white w-44 shadow-xl border rounded-xl py-2 z-50">
+                  {/* yahan updated My Profile button */}
                   <button
                     onClick={() => {
                       setProfileMenu(false);
-                      navigate("/dashboard");
+
+                      const roleFromUser = user.role;
+                      const roleFromStorage = localStorage.getItem("role");
+                      const role = roleFromUser || roleFromStorage;
+
+                      if (role === "farmer") {
+                        navigate("/farmer-dashboard");
+                      } else if (role === "buyer") {
+                        navigate("/buyer-dashboard");
+                      } else {
+                        navigate("/");
+                      }
                     }}
                     className="block w-full text-left px-4 py-2 hover:bg-gray-100"
                   >
                     My Profile
                   </button>
+
                   <button
                     onClick={handleLogout}
                     className="block w-full text-left text-red-600 px-4 py-2 hover:bg-gray-100"
@@ -193,7 +206,18 @@ const Navbar = () => {
               <button
                 onClick={() => {
                   setOpen(false);
-                  navigate("/dashboard");
+
+                  const roleFromUser = user.role;
+                  const roleFromStorage = localStorage.getItem("role");
+                  const role = roleFromUser || roleFromStorage;
+
+                  if (role === "farmer") {
+                    navigate("/farmer-dashboard");
+                  } else if (role === "buyer") {
+                    navigate("/buyer-dashboard");
+                  } else {
+                    navigate("/"); // fallback
+                  }
                 }}
                 className="text-green-800 font-semibold"
               >

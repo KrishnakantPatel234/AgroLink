@@ -1,24 +1,24 @@
 import React, { useEffect, useState } from "react";
-import { API_BASE_URL } from "../api"; 
+import { API_BASE_URL } from "../api";
 import { useNavigate } from "react-router-dom";
+import CropPostCard from "../components/CropPostCard";
 
 const FarmerDashboard = () => {
   const [farmer, setFarmer] = useState(null);
   const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const token = localStorage.getItem("token");
   const userId = localStorage.getItem("userId");
   const role = localStorage.getItem("role");
   const navigate = useNavigate();
 
-  // Fetch farmer data + posts
-  useEffect(() => {
+  const IMAGE_BASE_URL = API_BASE_URL.replace("/api", "");
 
+  useEffect(() => {
     if (role !== "farmer") {
-      if (role === "buyer") {
-        navigate("/buyer-dashboard");
-      } else {
-        navigate("/login");
-      }
+      if (role === "buyer") navigate("/buyer-dashboard");
+      else navigate("/login");
       return;
     }
 
@@ -29,6 +29,7 @@ const FarmerDashboard = () => {
 
     const fetchFarmerData = async () => {
       try {
+        setLoading(true);
         const res = await fetch(`${API_BASE_URL}/farmer/profile/${userId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -44,103 +45,158 @@ const FarmerDashboard = () => {
         }
 
         if (data.success) {
-          // backend se aa raha hai: { success, user, ... }
           setFarmer(data.user);
-          setPosts(data.posts || []); // agar tum posts add kar rahe ho to
+
+          const fetchedPosts = data.posts || [];
+          const sorted = [...fetchedPosts].sort((a, b) => {
+            const da = new Date(a.createdAt || a.date || 0);
+            const db = new Date(b.createdAt || b.date || 0);
+            return db - da; // latest first
+          });
+          setPosts(sorted);
         } else {
           alert("Failed to fetch farmer data");
         }
       } catch (err) {
         console.error("Error fetching farmer data:", err);
+      } finally {
+        setLoading(false);
       }
     };
 
-    if (userId && token) {
-      fetchFarmerData();
-    }
-  }, [userId, token, role, navigate]);
+    fetchFarmerData();
+  }, [userId, token, role, navigate , API_BASE_URL]);
 
+  const totalPosts = posts.length;
+  const totalQuantity = posts.reduce(
+    (sum, p) => sum + (Number(p.quantity) || 0),
+    0
+  );
 
-  if (!farmer)
+  if (loading || !farmer) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-gray-600">
-        Loading Farmer Dashboard...
+      <div className="min-h-screen flex items-center justify-center bg-green-50">
+        <div className="bg-white px-6 py-4 rounded-xl shadow-md border border-green-100 text-gray-700">
+          Loading Farmer Dashboard...
+        </div>
       </div>
     );
+  }
 
   return (
-    <div className="min-h-screen bg-green-100 p-4">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold text-green-700">👨‍🌾 Farmer Dashboard</h1>
-
-        {farmer.profileImage ? (
-          <img
-            src={`${API_BASE_URL.replace("/api", "")}/${farmer.profileImage}`}
-            className="w-16 h-16 rounded-full object-cover border-2 border-green-500"
-            alt="Farmer"
-          />
-        ) : (
-          <div className="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center text-gray-600">
-            No Photo
-          </div>
-        )}
-      </div>
-
-      {/* Farmer Card */}
-      <div className="bg-white shadow-md rounded-2xl p-4 mb-5">
-        <h2 className="text-xl font-semibold">{farmer.name}</h2>
-        <p className="text-gray-700">📞 {farmer.phone}</p>
-        <p className="text-gray-700">🌾 Land: {farmer.landSize || "N/A"}</p>
-
-        {farmer.isOrganic && (
-          <span className="mt-2 inline-block bg-green-600 text-white px-3 py-1 rounded-xl text-sm">
-            ✔ Organic Farmer
-          </span>
-        )}
-      </div>
-
-      {/* Create Post Button */}
-      <button
-        onClick={() => (window.location.href = "/create-post")}
-        className="w-full bg-green-600 text-white py-3 rounded-xl shadow-md text-lg font-semibold hover:bg-green-700 transition mb-4"
-      >
-        ➕ Create New Post
-      </button>
-
-      {/* Posts List */}
-      <h2 className="text-xl font-bold mb-3">Your Posts</h2>
-
-      {posts.length === 0 ? (
-        <p className="text-gray-600">You haven't posted anything yet.</p>
-      ) : (
-        posts.map((post) => (
-          <div key={post._id} className="bg-white shadow-lg rounded-xl p-4 mb-3">
-            <div className="flex gap-3">
-              {post.image ? (
-                <img
-                  src={`${API_BASE_URL.replace("/api", "")}/${post.image}`}
-                  className="w-20 h-20 rounded-lg object-cover"
-                  alt="Crop"
-                />
-              ) : (
-                <div className="w-20 h-20 bg-gray-200 flex items-center justify-center rounded-lg text-gray-500">
-                  No Image
-                </div>
+    <div className="min-h-screen bg-gradient-to-b from-green-50 via-white to-green-100 p-4 md:p-6">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-extrabold text-green-800 flex items-center gap-2">
+              👨‍🌾 Farmer Dashboard
+              {farmer.isOrganic && (
+                <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700 border border-green-200">
+                  Organic Farmer
+                </span>
               )}
+            </h1>
+            <p className="text-sm text-gray-600 mt-1">
+              Welcome, <span className="font-semibold">{farmer.name}</span> – manage
+              your crop posts and connect with buyers.
+            </p>
+          </div>
 
-              <div>
-                <h3 className="text-lg font-semibold">{post.cropName}</h3>
-                <p className="text-gray-700">📦 {post.quantity} KG</p>
-                <p className="text-gray-700">💰 ₹{post.price} per KG</p>
-                <p className="text-gray-500 text-sm">
-                  📅 {new Date(post.date).toLocaleDateString()}
-                </p>
+          <div className="flex items-center gap-3">
+            {farmer.profileImage ? (
+              <img
+                src={`${IMAGE_BASE_URL}/${farmer.profileImage}`}
+                className="w-14 h-14 md:w-16 md:h-16 rounded-full object-cover border-2 border-green-500 shadow-sm"
+                alt="Farmer"
+              />
+            ) : (
+              <div className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-green-200 flex items-center justify-center text-green-800 font-bold text-xl">
+                {farmer.name?.charAt(0).toUpperCase() || "F"}
               </div>
+            )}
+            <div className="text-sm">
+              <p className="font-semibold text-gray-800">{farmer.name}</p>
+              <p className="text-gray-500 text-xs">📞 {farmer.phone}</p>
+              {farmer.landSize && (
+                <p className="text-gray-500 text-xs">
+                  🌾 Land: {farmer.landSize}
+                </p>
+              )}
             </div>
           </div>
-        ))
-      )}
+        </div>
+
+        {/* Stats + CTA */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="bg-white/90 border border-green-100 rounded-2xl shadow-sm p-4">
+            <p className="text-xs text-gray-500">Total Posts</p>
+            <p className="text-2xl font-bold text-green-700 mt-1">{totalPosts}</p>
+          </div>
+          <div className="bg-white/90 border border-green-100 rounded-2xl shadow-sm p-4">
+            <p className="text-xs text-gray-500">Total Quantity Listed (KG)</p>
+            <p className="text-2xl font-bold text-green-700 mt-1">
+              {totalQuantity}
+            </p>
+          </div>
+          <div className="bg-green-50 border border-green-100 rounded-2xl shadow-sm p-4">
+            <p className="text-xs text-gray-500">Tip</p>
+            <p className="text-sm text-gray-700 mt-1">
+              Clear images & correct price help you get buyers faster.
+            </p>
+          </div>
+          <div className="bg-gradient-to-br from-green-600 to-green-500 rounded-2xl shadow-md p-4 text-white flex flex-col justify-between">
+            <p className="text-sm font-semibold">Create New Crop Post</p>
+            <p className="text-[11px] text-green-100 mt-1">
+              Add your latest harvest, it will appear on Marketplace too.
+            </p>
+            <button
+              onClick={() => navigate("/create-post")}
+              className="mt-3 w-full py-2 rounded-xl bg-white/10 hover:bg-white/20 text-sm font-semibold border border-white/30 transition"
+            >
+              ➕ Create Post
+            </button>
+          </div>
+        </div>
+
+        {/* Posts */}
+        <div className="bg-white/95 border border-green-100 rounded-2xl shadow-sm p-4 md:p-5">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-lg md:text-xl font-bold text-gray-800">
+              Your Crop Posts
+            </h2>
+            <span className="text-xs text-gray-500">
+              Latest posts appear first
+            </span>
+          </div>
+
+          {posts.length === 0 ? (
+            <div className="text-center py-10 text-gray-500 text-sm">
+              You haven&apos;t posted anything yet.
+              <br />
+              <button
+                onClick={() => navigate("/create-post")}
+                className="mt-3 inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white text-sm rounded-xl shadow hover:bg-green-700 transition"
+              >
+                ➕ Create your first post
+              </button>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 gap-4">
+              {posts.map((post) => (
+                <CropPostCard
+                  key={post._id}
+                  post={post}
+                  // future: navigate to detail page
+                  onClick={() => {
+                    // e.g. navigate(`/post/${post._id}`);
+                  }}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

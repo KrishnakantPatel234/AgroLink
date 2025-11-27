@@ -24,7 +24,7 @@ const productSchema = new mongoose.Schema(
     },
     unit: {
       type: String,
-      enum: ["kg", "quintal", "litre", "piece"],
+      enum: ["kg", "quintal", "dozen", "piece"],
       default: "kg",
     },
     quantityAvailable: {
