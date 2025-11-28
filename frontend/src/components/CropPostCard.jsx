@@ -5,96 +5,171 @@ import { API_BASE_URL } from "../api";
 const IMAGE_BASE_URL = API_BASE_URL.replace("/api", "");
 
 const CropPostCard = ({
-  post,
-  onClick,
+  product,
   showFarmerInfo = false,
   showContactButton = false,
   onContactClick,
+  onClick,
+  className = "",
 }) => {
-  if (!post) return null;
+  if (!product) return null;
 
-  const {
-    title,
-    cropName,
-    quantity,
-    price,
-    location,
-    image,
-    createdAt,
-    date,
-    farmer, // optional: { name, phone }
-  } = post;
+  // ---------- DATA MAPPING ----------
+  const title =
+    product.title ||
+    product.name ||
+    product.cropName ||
+    "Crop Post";
 
-  const displayTitle = title || cropName || "Crop Post";
-  const displayLocation = location || "Location not set";
-  const displayDate = new Date(createdAt || date || Date.now()).toLocaleDateString();
+  const cropName = product.cropName || product.name || "";
 
-  const imageSrc = image
-    ? `${IMAGE_BASE_URL}/${image}`
-    : "https://via.placeholder.com/300x200?text=Crop"; // fallback
+  const quantity =
+    product.quantityAvailable ??
+    product.quantity ??
+    0;
 
+  const unit = product.unit || "";
+
+  const price =
+    product.pricePerUnit ??
+    product.price ??
+    0;
+
+  const locationText =
+  typeof product.location === "string" && product.location.trim()
+    ? product.location.trim()
+    : "Location not set";
+
+
+  const description = product.description || "";
+
+  const displayDate = new Date(
+    product.createdAt || product.date || Date.now()
+  ).toLocaleDateString();
+
+  const rawImage = product.imageUrl || product.image;
+  let imageSrc = null;
+  if (rawImage) {
+    if (rawImage.startsWith("http")) {
+      imageSrc = rawImage;
+    } else {
+      const cleanPath = rawImage.replace(/^\/+/, "");
+      imageSrc = `${IMAGE_BASE_URL}/${cleanPath}`;
+    }
+  }
+
+  const farmer = product.farmer;
+
+  // ---------- UI ----------
   return (
     <div
-      className="bg-white border border-green-50 rounded-xl shadow-sm p-3 flex gap-3 hover:shadow-md hover:-translate-y-0.5 transition cursor-pointer"
       onClick={onClick}
+      className={`
+        w-full
+        bg-white
+        rounded-3xl
+        shadow-lg
+        border border-green-100
+        overflow-hidden
+        flex flex-col
+        min-h-[360px]        /* 🔹 bada, roomy card */
+        hover:shadow-xl hover:-translate-y-1.5
+        transition
+        cursor-pointer
+        ${className}
+      `}
     >
-      {/* Image */}
-      <div className="flex-shrink-0">
-        <img
-          src={imageSrc}
-          alt={displayTitle}
-          className="w-24 h-24 rounded-lg object-cover border border-green-100"
-          onClick={(e) => e.stopPropagation()}
-        />
+      {/* TOP: IMAGE */}
+      <div className="w-full h-40 md:h-44 bg-gray-50 overflow-hidden">
+        {imageSrc ? (
+          <img
+            src={imageSrc}
+            alt={title}
+            className="w-full h-full object-cover"
+            onClick={(e) => e.stopPropagation()}
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-r from-green-50 via-green-100 to-green-50 flex items-center justify-center text-sm text-green-700 font-medium">
+            No image available
+          </div>
+        )}
       </div>
 
-      {/* Content */}
-      <div className="flex-1 flex flex-col justify-between">
-        <div>
-          <h3 className="text-sm md:text-base font-semibold text-gray-900 line-clamp-1">
-            {displayTitle}
-          </h3>
+      {/* BOTTOM: CONTENT */}
+      <div className="flex-1 flex flex-col justify-between p-4 md:p-5 text-xs md:text-sm">
+        <div className="space-y-2">
+          {/* Title + price */}
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex-1 min-w-0">
+              <h3 className="text-base md:text-lg font-semibold text-gray-900 truncate">
+                {title}
+              </h3>
+              {cropName && (
+                <p className="text-[11px] md:text-xs text-gray-500 mt-0.5 truncate">
+                  🌾 {cropName}
+                </p>
+              )}
+            </div>
 
-          {cropName && (
-            <p className="text-xs text-gray-500 mt-0.5">🌾 {cropName}</p>
-          )}
-
-          <p className="text-xs text-gray-500">
-            📍 {displayLocation}
-          </p>
-
-          {showFarmerInfo && farmer && (
-            <p className="text-[11px] text-gray-500 mt-1">
-              👨‍🌾 {farmer.name} {farmer.phone && `· 📞 ${farmer.phone}`}
-            </p>
-          )}
-        </div>
-
-        <div className="mt-1 flex items-center justify-between text-[11px] text-gray-600">
-          <div>
-            <span className="mr-2">
-              📦 {quantity || 0} KG
-            </span>
-            <span>💰 ₹{price || 0} / KG</span>
+            <div className="shrink-0 bg-green-50 text-green-700 text-[11px] md:text-xs px-3 py-1.5 rounded-2xl font-semibold text-right">
+              ₹{price || 0}
+              {unit ? ` / ${unit}` : ""}
+            </div>
           </div>
-          <span className="text-gray-400">📅 {displayDate}</span>
+
+          {/* Location + quantity */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-50 text-[11px] md:text-xs text-gray-700 max-w-[60%]">
+              📍
+              <span className="truncate">{locationText}</span>
+            </span>
+
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-green-50 text-[11px] md:text-xs text-green-700 font-medium">
+              📦 {quantity} {unit}
+            </span>
+          </div>
+
+          {/* Description – zyada space */}
+          <p className="mt-2 text-[11px] md:text-xs text-gray-700 leading-relaxed max-h-20 overflow-hidden">
+            {description || "No description added."}
+          </p>
         </div>
 
-        {/* Contact button (for marketplace / buyers) */}
-        {showContactButton && (
-          <div className="mt-2 flex justify-end">
+        {/* Bottom row */}
+        <div className="mt-3 flex items-center gap-2">
+          <div className="flex-1 min-w-0">
+            {showFarmerInfo && farmer && (
+              <p className="text-[11px] md:text-xs text-gray-600 truncate">
+                👨‍🌾 {farmer.name}
+                {farmer.phone && ` · 📞 ${farmer.phone}`}
+              </p>
+            )}
+            {!showFarmerInfo && (
+              <p className="text-[11px] md:text-xs text-gray-400">
+                📅 {displayDate}
+              </p>
+            )}
+          </div>
+
+          {showFarmerInfo && (
+            <span className="hidden sm:inline text-[11px] text-gray-400 mr-1">
+              📅 {displayDate}
+            </span>
+          )}
+
+          {showContactButton && (
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                onContactClick && onContactClick(post);
+                onContactClick && onContactClick(product);
               }}
-              className="px-3 py-1 text-[11px] rounded-lg bg-green-600 text-white shadow hover:bg-green-700 transition"
+              className="px-3 md:px-4 py-1.5 text-[11px] md:text-xs rounded-lg bg-green-600 text-white shadow-sm hover:bg-green-700 active:scale-95 transition"
             >
-              📞 Contact Farmer
+              📞 Contact
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

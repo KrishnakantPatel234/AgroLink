@@ -69,7 +69,6 @@ const Marketplace = () => {
       return;
     }
 
-    // yahan se aage ka flow: chat/order page etc.
     alert(
       `Buyer contact flow yahan aayega.\nFarmer: ${
         product.farmer?.name || "Unknown"
@@ -139,46 +138,18 @@ const Marketplace = () => {
           <p className="text-center text-red-600 mb-4 text-sm">{error}</p>
         )}
 
-        {/* Product cards using common CropPostCard */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {products.map((p) => {
-            // 👇 Product -> Post shape mapping for common card
-            const locationText = p.location
-              ? [
-                  p.location.village,
-                  p.location.district,
-                  p.location.state,
-                ]
-                  .filter(Boolean)
-                  .join(", ")
-              : "";
-
-            const pseudoPost = {
-              _id: p._id,
-              title: p.name,
-              cropName: p.name,
-              quantity: p.quantityAvailable,
-              price: p.pricePerUnit,
-              location: locationText,
-              image: p.imageUrl, // CropPostCard me yahi field use ho raha hai
-              createdAt: p.createdAt,
-              farmer: p.farmer, // populated: { name, phone }
-            };
-
-            return (
-              <CropPostCard
-                key={p._id}
-                post={pseudoPost}
-                showFarmerInfo={true}
-                showContactButton={true}
-                onContactClick={() => handleContactFarmer(p)}
-                onClick={() => {
-                  // future: detail page agar banana ho
-                  // navigate(`/product/${p._id}`);
-                }}
-              />
-            );
-          })}
+        {/* ✅ Single grid, proper stretching, no nesting */}
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 items-stretch">
+          {products.map((p) => (
+            <CropPostCard
+              key={p._id}
+              product={p}
+              showFarmerInfo={!!p.farmer}
+              showContactButton={true}
+              onContactClick={handleContactFarmer}
+              className="h-full"
+            />
+          ))}
         </div>
 
         {!loading && !error && products.length === 0 && (
