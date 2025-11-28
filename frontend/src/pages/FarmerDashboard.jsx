@@ -182,15 +182,11 @@ const FarmerDashboard = () => {
               </button>
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 auto-rows-fr">
               {posts.map((post) => (
                 <CropPostCard
                   key={post._id}
-                  post={post}
-                  // future: navigate to detail page
-                  onClick={() => {
-                    // e.g. navigate(`/post/${post._id}`);
-                  }}
+                  product={post}   // 👈 same prop
                 />
               ))}
             </div>

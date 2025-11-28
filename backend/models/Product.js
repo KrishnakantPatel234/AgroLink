@@ -33,9 +33,8 @@ const productSchema = new mongoose.Schema(
       min: 0,
     },
     location: {
-      village: String,
-      district: String,
-      state: String,
+      type: String,
+      default: "",
     },
     description: {
       type: String,
